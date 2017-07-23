@@ -45,9 +45,11 @@ class Crawl():
                 tmpPage = requests.get(url, allow_redirects=False)
                 if tmpPage.status_code == 302:
                     self.urls.put(tmpPage.headers.get("location"))
-        next_page = soup.find("strong")
-        next_page = next_page.find_next_siblings(attrs={"class":"n"})
-        if next_page:
+        next_page = soup.find_all(attrs={"class": "n"})
+        if len(next_page)==2:
+            url = "http://www.baidu.com"+next_page[1].get("href")
+            self.next_page = url
+        elif len(next_page)==1 and next_page[0].text==u'下一页>' :
             url = "http://www.baidu.com"+next_page[0].get("href")
             self.next_page = url
         else:
@@ -59,21 +61,24 @@ def run(word):
     c.urls, c.next_page = c.baidu_crawl()
     while True:
         while not c.urls.empty():
-            url = c.urls.get()
+            url = c.urls.get().strip()
             s = AutoSqli(url)
+            t = threading.Thread(target=p, args=(url,))
             # t = gevent.spawn(s.run)
-            t = threading.Thread(target=s.run)
             c.threads.append(t)
-            print url
             t.start()
         else:
             # gevent.joinall(c.threads)
             for t in c.threads:
                 t.join()
+            print c.next_page
             if c.next_page:
                 c.urls, c.next_page = c.baidu_crawl()
             else:
                 break
+
+def p(url):
+    print url
 
 if __name__ == '__main__':
     parse = argparse.ArgumentParser()
@@ -87,5 +92,6 @@ if __name__ == '__main__':
         f = open(args.file, "r")
         lines = f.readlines()
         for line in lines:
-            word = line
+            word = str(line).strip()
+            run(word)
     print "All Crawl and Done!!!!!!!!!1"
