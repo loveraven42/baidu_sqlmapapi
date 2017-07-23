@@ -1,7 +1,7 @@
 # baidu_sqlmapapi
 - 作用：
   - 提供一个关键字，然后用百度搜索进行查找sqlmap注入
-  - 刷教育行业src的应该比较不错
+- 用途: 刷教育行业src的应该比较不错
 ***
 ```
 usage: crawl.py [-h] [-w WORD] [-f FILE]
