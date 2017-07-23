@@ -63,7 +63,7 @@ def run(word):
         while not c.urls.empty():
             url = c.urls.get().strip()
             s = AutoSqli(url)
-            t = threading.Thread(target=p, args=(url,))
+            t = threading.Thread(target=s.run)
             # t = gevent.spawn(s.run)
             c.threads.append(t)
             t.start()
