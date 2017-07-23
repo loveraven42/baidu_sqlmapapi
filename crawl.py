@@ -91,7 +91,18 @@ if __name__ == '__main__':
     if args.file:
         f = open(args.file, "r")
         lines = f.readlines()
-        for line in lines:
-            word = str(line).strip()
-            run(word)
+        threads = []
+        while True:
+            while lines and len(threads) < 10:
+                word = str(lines.pop()).strip()
+                t = threading.Thread(target=run, args=(word,))
+                threads.append(t)
+                t.run()
+            for t in threads:
+                t.join()
+            if not lines:
+                break
+        # for line in lines:
+        #     word = str(line).strip()
+        #     run(word)
     print "All Crawl and Done!!!!!!!!!1"
