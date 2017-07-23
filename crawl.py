@@ -66,6 +66,7 @@ def run(word):
             t = threading.Thread(target=s.run)
             # t = gevent.spawn(s.run)
             c.threads.append(t)
+            print url
             t.start()
         else:
             # gevent.joinall(c.threads)
