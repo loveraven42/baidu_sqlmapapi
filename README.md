@@ -19,3 +19,6 @@ optional arguments:
 
 - 先开启sqlmapapi  命令: sqlmapapi -s
 - 注意事项 word关键字如果有空格的话需要加上引号 example: -w "site:edu.cn inurl:?id="
+
+***
+**ps: 对文件处理的多线程还没有测试过(测试过有问题的话请提issue，谢谢)**
