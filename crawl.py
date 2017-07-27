@@ -2,6 +2,8 @@
 # MainUsage: 计划为边爬行边扫描的脚本
 import requests
 import gevent
+from gevent import monkey
+monkey.patch_all(thread=False, socket=False)
 from gevent.queue import Queue
 from bs4 import BeautifulSoup
 from AutoSqli import AutoSqli
@@ -44,6 +46,7 @@ class Crawl():
             if url:
                 tmpPage = requests.get(url, allow_redirects=False)
                 if tmpPage.status_code == 302:
+                    # self.urls.put_nowait(tmpPage.headers.get("location"))
                     self.urls.put(tmpPage.headers.get("location"))
         next_page = soup.find_all(attrs={"class": "n"})
         if len(next_page)==2:
@@ -63,15 +66,15 @@ def run(word):
         while not c.urls.empty():
             url = c.urls.get().strip()
             s = AutoSqli(url)
-            t = threading.Thread(target=s.run)
-            # t = gevent.spawn(s.run)
+            # t = threading.Thread(target=s.run)
+            t = gevent.spawn(s.run)
             c.threads.append(t)
             print url
-            t.start()
+            # t.start()
         else:
-            # gevent.joinall(c.threads)
-            for t in c.threads:
-                t.join()
+            gevent.joinall(c.threads)
+            # for t in c.threads:
+            #     t.join()
             print c.next_page
             if c.next_page:
                 c.urls, c.next_page = c.baidu_crawl()
@@ -92,15 +95,16 @@ if __name__ == '__main__':
     if args.file:
         f = open(args.file, "r")
         lines = f.readlines()
-        threads = []
         while True:
+	    threads = []
             while lines and len(threads) < 10:
                 word = str(lines.pop()).strip()
-                t = threading.Thread(target=run, args=(word,))
+                word = "site:edu.cn "+ str(word)
+                t = gevent.spawn(run, word)
+                # t = threading.Thread(target=run, args=(word,))
                 threads.append(t)
-                t.run()
-            for t in threads:
-                t.join()
+                #t.run()
+            gevent.joinall(threads)
             if not lines:
                 break
         # for line in lines:
